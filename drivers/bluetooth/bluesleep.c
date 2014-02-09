@@ -165,6 +165,26 @@ void bluesleep_sleep_wakeup(void)
 		/*Activating UART */
 		hsuart_power(1);
 	}
+ /* < DTS2011041200759 xuhui 20110413 begin */
+ #ifdef CONFIG_HUAWEI_KERNEL
+ else
+ {
+     /*Tx idle, Rx busy, we must also make host_wake asserted, that is low
+     * 1 means bt chip can sleep, in bluesleep.c
+     */
+         /* < DTS2011060102446 xuhui 20110601 begin */
+         /* Here we depend on the status of MSM gpio, for stability */
+         if(1 == gpio_get_value(bsi->ext_wake))
+         /* DTS2011060102446 xuhui 20110601 end > */
+     {
+         printk(KERN_ERR "-bluesleep_sleep_wakeup wakeup bt chip\n");
+         /*0 means wakup bt chip */
+         gpio_set_value(bsi->ext_wake, 0);  
+         mod_timer(&tx_timer, jiffies + (TX_TIMER_INTERVAL * HZ));
+     } 
+ }
+ #endif
+ /* DTS2011041200759 xuhui 20110413 end > */
 }
 
 /**
